@@ -13,8 +13,9 @@ class LingottoFiere:
         self.listaStandPreseElettriche = []
         self.listaStandPremium = []
         self.listaEspositori = []
+        self.espositoriStand = []
 
-    """Aggiungere setter e getter se necessari"""
+        """Aggiungere setter e getter se necessari"""
     @property
     def nome(self):
         return self.__nome
@@ -35,34 +36,73 @@ class LingottoFiere:
                 padiglione = dato[2]
                 prezzo = int(dato[3])
                 if dato[4] == "":
-                    stand = [codice, superficie, padiglione, prezzo]
+                    stand = StandStandard(codice, superficie, padiglione, prezzo)
                     self.listaStandStandard.append(stand)
 
                 elif dato[4].isdigit():
                     prese= int(dato[4])
                     prezzo = prezzo * (1 + 0.07*prese)
-                    stand = [codice, superficie, padiglione, prezzo, prese]
+                    stand = StandPreseElettriche(codice, superficie, padiglione, prezzo, prese)
                     self.listaStandPreseElettriche.append(stand)
-
 
                 else:
                     posizione = dato[4]
                     prezzo =  1.30*prezzo
-                    stand = [codice, superficie, padiglione, prezzo, posizione]
+                    stand = StandPremium(codice, superficie, padiglione, prezzo, posizione)
                     self.listaStandPremium.append(stand)
 
             elif dato[0][0] == "E":
                 codice = dato[0]
                 nome = dato[1]
                 cognome = dato[2]
-                espositore = [codice, nome, cognome]
+                espositore = Espositore(codice, nome, cognome)
                 self.listaEspositori.append(espositore)
 
 
 
     def assegna_stand_a_espositore(self, codice_stand, codice_espositore):
         """Associa uno stand a un espositore"""
-        # TODO
+
+        disponibile = True
+        standTrovato = None
+        espositoreTrovato = None
+
+        for elemento in (self.listaStandStandard + self.listaStandPreseElettriche + self.listaStandPremium):
+            if elemento.codice == codice_stand:
+                standTrovato = elemento
+                break
+
+        if not standTrovato:
+            print(f"{codice_stand} non è valido perchè non è presente nel database!")
+            disponibile = False
+            raise Exception
+
+
+        for espositore in self.listaEspositori:
+            if espositore.codice == codice_espositore:
+                espositoreTrovato = espositore
+                break
+
+        if not espositoreTrovato:
+            print(f"{codice_espositore} non è valido perchè non è presente nel database!")
+            disponibile = False
+            raise Exception
+
+
+
+        for elemento in self.espositoriStand:
+           if elemento[1].codice == codice_espositore :
+                print(f"{codice_espositore} già assegnato a uno stand!")
+                disponibile = False
+                raise Exception
+
+
+        if disponibile:
+            standTrovato.espositore= espositoreTrovato
+            self.espositoriStand.append((standTrovato, espositoreTrovato))
+
+
+
 
     def elenca_espositori(self):
         """Stampa l'elenco degli espositori mostrando, per ognuno, lo stand a cui è associato, quando applicabile """
