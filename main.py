@@ -19,23 +19,23 @@ def main():
 
         if scelta == "1":
             nuovo_nome = input("Inserisci il nuovo nome del centro fieristico: ")
-            LingottoFiere.nome = nuovo_nome
+            lingotto.nome = nuovo_nome
             print("Nome aggiornato correttamente!")
 
         elif scelta == "2":
             file_path = "dati_lingotto.csv"
             try:
                 lingotto.carica_file_dati(file_path)
-                print("Dati caricati correttamente.")
+                print("Dati caricati correttamente!")
             except FileNotFoundError:
-                print("File non trovato.")
+                print("File non trovato!")
 
         elif scelta == "3":
             codice_stand = input("Codice stand: ")
             codice_espositore = input("Codice espositore: ")
             try:
                 lingotto.assegna_stand_a_espositore(codice_stand, codice_espositore)
-                print("Stand assegnato con successo.")
+                print("Stand assegnato con successo!")
             except Exception as e:
                 print(f"Errore: {e}")
 

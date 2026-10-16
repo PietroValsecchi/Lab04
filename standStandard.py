@@ -1,9 +1,9 @@
 class StandStandard:
-    def __init__(self, codice, superficie, padiglione, prezzo, espositore):
+    def __init__(self, codice, superficie, padiglione, prezzo):
         self.__codice = codice
-        self.__superficie = int(superficie)
+        self.__superficie = float(superficie)
         self.__padiglione = padiglione
-        self.__prezzo = int(prezzo)
+        self.__prezzo = float(prezzo)
         self.__espositore = None
 
     @property
@@ -21,9 +21,27 @@ class StandStandard:
     def disponibile(self):
          return self.__espositore is None
 
+    @property
+    def superficie(self):
+        return self.__superficie
+
+    @property
+    def padiglione(self):
+        return self.__padiglione
+
+    @property
+    def prezzo(self):
+        return self.__prezzo
 
     def __str__(self):
-        return f"{self.__codice}, {self.__superficie}, {self.__padiglione}, {self.__prezzo}"
+        if self.disponibile():
+            stato = "Disponibile"
+        else:
+            stato = "Non disponibile"
+        return (f"Codice: {self.codice_stand} - " f"Superficie: {self.superficie:.2f}mq - " f"Padiglione: {self.padiglione} - " f"Prezzo: {self.prezzo:.2f}€ - " f"{stato}")
+
+
+
 
 
 

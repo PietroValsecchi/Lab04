@@ -5,4 +5,7 @@ class Espositore:
         self.cognome = cognome
 
     def __str__(self):
-        return f"{self.codice} {self.nome} {self.cognome}"
+        return f"Codice: {self.codice} - Nome: {self.nome} - Cognome: {self.cognome}"
+
+    def __eq__(self, other):
+        return self.codice == other.codice

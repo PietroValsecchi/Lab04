@@ -6,6 +6,14 @@ class StandPreseElettriche(StandStandard):
         self.__prese= int(prese)
 
 
+    @property
+    def prese(self):
+        return self.__prese
+
     def __str__(self):
-        return f"{self.__codice}, {self.__superficie}, {self.__padiglione}, {self.__prezzo}, {self.__prese}"
+        if self.disponibile():
+            stato = "Disponibile"
+        else:
+            stato = "Non disponibile"
+        return (f"Codice: {self.codice_stand} - " f"Superficie: {self.superficie:.2f}mq - " f"Padiglione: {self.padiglione} - " f"Prezzo: {self.prezzo:.2f}€ - " f"Numero prese: {self.prese} - " f"{stato}")
 

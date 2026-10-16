@@ -1,8 +1,10 @@
 from csv import reader
+from operator import attrgetter
 from standStandard import StandStandard
 from standPreseElettriche import StandPreseElettriche
 from standPremium import StandPremium
 from espositore import Espositore
+
 
 class LingottoFiere:
 
@@ -27,36 +29,38 @@ class LingottoFiere:
 
     def carica_file_dati(self, file_path):
         """Carica i dati (stand ed espositori) dal file"""
-        file = open(file_path, "r")
-        dati=reader(file)
-        for dato in dati:
-            if dato[0][0] == "S":
-                codice = dato[0]
-                superficie = int(dato[1])
-                padiglione = dato[2]
-                prezzo = int(dato[3])
-                if dato[4] == "":
-                    stand = StandStandard(codice, superficie, padiglione, prezzo)
-                    self.listaStandStandard.append(stand)
+        with open(file_path, "r", encoding="utf-8") as file:
+            dati=reader(file)
+            for dato in dati:
+                if dato[0][0] == "S":
+                    codice = dato[0]
+                    superficie = float(dato[1])
+                    padiglione = dato[2]
+                    prezzo = float(dato[3])
 
-                elif dato[4].isdigit():
-                    prese= int(dato[4])
-                    prezzo = prezzo * (1 + 0.07*prese)
-                    stand = StandPreseElettriche(codice, superficie, padiglione, prezzo, prese)
-                    self.listaStandPreseElettriche.append(stand)
+                    if len(dato) == 4:
+                        stand = StandStandard(codice, superficie, padiglione, prezzo)
+                        self.listaStandStandard.append(stand)
 
-                else:
-                    posizione = dato[4]
-                    prezzo =  1.30*prezzo
-                    stand = StandPremium(codice, superficie, padiglione, prezzo, posizione)
-                    self.listaStandPremium.append(stand)
+                    elif dato[4].isdigit():
+                        prese = int(dato[4])
+                        prezzo = prezzo * (1 + 0.07 * prese)
+                        stand = StandPreseElettriche(codice, superficie, padiglione, prezzo, prese)
+                        self.listaStandPreseElettriche.append(stand)
 
-            elif dato[0][0] == "E":
-                codice = dato[0]
-                nome = dato[1]
-                cognome = dato[2]
-                espositore = Espositore(codice, nome, cognome)
-                self.listaEspositori.append(espositore)
+                    else:
+                        posizione = dato[4]
+                        prezzo = prezzo * 1.30
+                        stand = StandPremium(codice, superficie, padiglione, prezzo, posizione)
+                        self.listaStandPremium.append(stand)
+
+
+                elif dato[0][0] == "E":
+                    codice = dato[0]
+                    nome = dato[1]
+                    cognome = dato[2]
+                    espositore = Espositore(codice, nome, cognome)
+                    self.listaEspositori.append(espositore)
 
 
 
@@ -68,33 +72,32 @@ class LingottoFiere:
         espositoreTrovato = None
 
         for elemento in (self.listaStandStandard + self.listaStandPreseElettriche + self.listaStandPremium):
-            if elemento.codice == codice_stand:
+            if elemento.codice_stand == codice_stand.upper():
                 standTrovato = elemento
                 break
 
         if not standTrovato:
-            print(f"{codice_stand} non è valido perchè non è presente nel database!")
             disponibile = False
-            raise Exception
+            raise Exception(f"{codice_stand} non è valido perchè non è presente nel database!")
 
 
         for espositore in self.listaEspositori:
-            if espositore.codice == codice_espositore:
+            if espositore.codice == codice_espositore.upper():
                 espositoreTrovato = espositore
                 break
 
         if not espositoreTrovato:
-            print(f"{codice_espositore} non è valido perchè non è presente nel database!")
             disponibile = False
-            raise Exception
+            raise Exception(f"{codice_espositore} non è valido perchè non è presente nel database!")
 
+        if not standTrovato.disponibile():
+            raise Exception(f"{codice_stand} già associato a un espositore!")
 
 
         for elemento in self.espositoriStand:
-           if elemento[1].codice == codice_espositore :
-                print(f"{codice_espositore} già assegnato a uno stand!")
+           if elemento[1].codice == codice_espositore.upper() :
                 disponibile = False
-                raise Exception
+                raise Exception(f"{codice_espositore} già assegnato a uno stand!")
 
 
         if disponibile:
@@ -106,8 +109,24 @@ class LingottoFiere:
 
     def elenca_espositori(self):
         """Stampa l'elenco degli espositori mostrando, per ognuno, lo stand a cui è associato, quando applicabile """
-        # TODO
+
+        for espositore in self.listaEspositori:
+            assegnato = False
+            for esp in self.espositoriStand:
+                if esp[1].codice == espositore.codice:
+                    print(f"Espositore: ({espositore}). ---> Codice stand associato: {esp[0].codice_stand}")
+                    assegnato = True
+                    break
+            if not assegnato:
+                print(f"Espositore: ({espositore}). ---> Non è associato a nessuno stand!")
+
+
+
+
 
     def stand_ordinati_per_prezzo(self):
         """Restituisce la lista ordinata degli stand in base al prezzo"""
-        # TODO
+
+        stand_ordinati = self.listaStandStandard + self.listaStandPreseElettriche + self.listaStandPremium
+        stand_ordinati.sort(key=attrgetter('prezzo'))
+        return stand_ordinati
